@@ -3,6 +3,7 @@
 const COLUMNS = ['todo', 'inprogress', 'done'];
 let cards = [];
 let dragId = null;
+let appInitialized = false;
 
 // ── Persistence ──────────────────────────────────────────────────────────────
 
@@ -10,12 +11,17 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
+function getStorageKey() {
+  const user = window.getAuthUser?.();
+  return `kanban-cards-${user?.id || 'anonymous'}`;
+}
+
 function saveCards() {
-  localStorage.setItem('kanban-cards', JSON.stringify(cards));
+  localStorage.setItem(getStorageKey(), JSON.stringify(cards));
 }
 
 function loadCards() {
-  const raw = localStorage.getItem('kanban-cards');
+  const raw = localStorage.getItem(getStorageKey());
   cards = raw ? JSON.parse(raw) : getDefaultCards();
 }
 
@@ -220,15 +226,18 @@ function clearDropStyles() {
     .forEach(el => el.classList.remove('drag-over'));
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Init (called by auth.js after login) ──────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   loadCards();
   render();
-  setupColumnDropZones();
 
-  document.getElementById('add-btn').addEventListener('click', addCard);
-  document.getElementById('card-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addCard();
-  });
-});
+  if (!appInitialized) {
+    setupColumnDropZones();
+    document.getElementById('add-btn').addEventListener('click', addCard);
+    document.getElementById('card-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addCard();
+    });
+    appInitialized = true;
+  }
+}

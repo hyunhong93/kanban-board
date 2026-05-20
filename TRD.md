@@ -9,8 +9,10 @@
 | 스크립트 | Vanilla JavaScript | ES2020, `'use strict'` |
 | 폰트 | Google Fonts CDN | Roboto 400/500/700 |
 | 아이콘 | Material Icons CDN | Google Fonts Icon |
-| 저장소 | Web Storage API | `localStorage` |
+| 저장소 | Web Storage API | `localStorage` (사용자별 키 스코핑) |
 | 드래그 앤 드롭 | HTML5 Drag and Drop API | 네이티브 |
+| 인증 | Supabase Auth | `@supabase/supabase-js@2` CDN |
+| 배포 | GitHub Pages | `https://hyunhong93.github.io/kanban-board` |
 | 로컬 서버 | Python http.server | `python3 -m http.server 8765` |
 
 ---
@@ -21,11 +23,13 @@
 
 ```
 브라우저
-  └── index.html (레이아웃)
+  └── index.html (레이아웃 + 인증 오버레이)
         ├── style.css (스타일)
-        └── app.js (로직)
+        ├── auth.js (Supabase 인증 로직)
+        │     └── Supabase CDN (@supabase/supabase-js@2)
+        └── app.js (칸반 로직)
               ├── State: cards[] (메모리)
-              └── Persistence: localStorage['kanban-cards']
+              └── Persistence: localStorage['kanban-cards-{userId}']
 ```
 
 ### 2.2 데이터 흐름
@@ -63,22 +67,50 @@
 - 드래그 상태 클래스: `.dragging`, `.drag-over`, `.drop-above`, `.drop-below`
 - `[data-column]` 속성 선택자로 컬럼별 테마 적용
 
-### 3.3 app.js
+### 3.3 auth.js (신규)
+
+```
+Supabase 클라이언트 초기화
+  SUPABASE_URL / SUPABASE_ANON_KEY — 환경 상수
+
+전역 공개 함수
+  window.getAuthUser()    — 현재 로그인 사용자 반환 (app.js에서 참조)
+
+인증 상태 관리
+  initAuth()              — 세션 복원 + onAuthStateChange 구독
+  showLogin() / showBoard()
+
+OAuth 로그인
+  signInWithGoogle()      — Google OAuth 리다이렉트
+  signInWithGithub()      — GitHub OAuth 리다이렉트
+
+이메일 인증
+  handleEmailSubmit(e)    — 로그인 / 회원가입 (isSignUp 플래그 분기)
+  toggleMode()            — 로그인 ↔ 회원가입 UI 전환
+
+기타
+  signOut()               — 세션 제거
+  updateUserInfo()        — 헤더 아바타·이름 갱신
+```
+
+### 3.4 app.js
 
 ```
 모듈 레벨 상태
-  cards: Card[]   — 전체 카드 배열
-  dragId: string  — 드래그 중인 카드 ID
+  cards: Card[]          — 전체 카드 배열
+  dragId: string         — 드래그 중인 카드 ID
+  appInitialized: bool   — 이벤트 리스너 중복 등록 방지 플래그
 
 Card 타입: { id: string, text: string, column: string, order: number }
 
 핵심 함수 그룹
-  [지속성]   uid / loadCards / saveCards / getDefaultCards
+  [지속성]   uid / getStorageKey / loadCards / saveCards / getDefaultCards
   [렌더링]   render / buildCard
   [CRUD]     addCard / deleteCard
   [DnD-카드] handleDragStart / handleDragEnd / handleCardDragOver / handleCardDrop
   [DnD-컬럼] setupColumnDropZones
   [유틸]     clearCardDropStyles / clearDropStyles
+  [진입점]   initApp()  — auth.js가 로그인 후 호출
 ```
 
 ---
@@ -119,10 +151,55 @@ e.clientY >= top + height / 2 →  drop-below (아래에 삽입)
 
 ---
 
-## 5. localStorage 스키마
+## 5. 인증 아키텍처
+
+### 5.1 Supabase Auth 설정
+
+| 항목 | 값 |
+|---|---|
+| Project URL | `https://dhikkucdbjqprrlduuqa.supabase.co` |
+| Anon Key | 코드 내 상수로 관리 (public key, 노출 무방) |
+| 활성화 Provider | Email/Password, Google OAuth, GitHub OAuth |
+
+### 5.2 인증 흐름
 
 ```
-Key:   'kanban-cards'
+페이지 로드
+    │
+    ▼
+initAuth() — getSession() 세션 확인
+    │
+    ├── 세션 있음 → showBoard() → initApp()
+    └── 세션 없음 → showLogin() (오버레이 표시)
+
+사용자 로그인 (OAuth / 이메일)
+    │
+    ▼
+Supabase onAuthStateChange (SIGNED_IN)
+    │
+    ▼
+showBoard() → updateUserInfo() → initApp()
+
+로그아웃
+    │
+    ▼
+signOut() → onAuthStateChange (SIGNED_OUT) → showLogin()
+```
+
+### 5.3 OAuth 리다이렉트 URL
+
+`redirectTo: window.location.origin + window.location.pathname`
+
+Supabase 대시보드 Authentication > URL Configuration에 등록 필요:
+- `https://hyunhong93.github.io/kanban-board/`
+- `http://localhost:8765/index.html` (로컬 개발)
+
+---
+
+## 6. localStorage 스키마
+
+```
+Key:   'kanban-cards-{userId}'   // userId = Supabase auth.user.id (UUID)
 Value: JSON.stringify(Card[])
 
 Card {
@@ -133,9 +210,24 @@ Card {
 }
 ```
 
+사용자별 스코핑으로 다른 계정의 데이터가 섞이지 않음.
+
 ---
 
-## 6. 브라우저 호환성
+## 7. 배포 (GitHub Pages)
+
+```
+레포지토리: https://github.com/hyunhong93/kanban-board
+배포 URL:   https://hyunhong93.github.io/kanban-board
+
+설정: Settings > Pages > Source: Deploy from branch > main / (root)
+```
+
+정적 파일만으로 구성되므로 별도 빌드 없이 GitHub Pages에서 직접 서빙 가능.
+
+---
+
+## 8. 브라우저 호환성
 
 | 기능 | 최소 버전 |
 |---|---|
@@ -149,7 +241,7 @@ Card {
 
 ---
 
-## 7. 성능 고려사항
+## 9. 성능 고려사항
 
 - 카드 수 ~100개 이하: 전체 재렌더 성능 문제 없음
 - localStorage 용량 한계: 도메인당 5MB (카드 텍스트 기준 수만 건 저장 가능)
@@ -157,7 +249,7 @@ Card {
 
 ---
 
-## 8. 실행 방법
+## 10. 실행 방법
 
 ```bash
 # kanban 디렉터리에서

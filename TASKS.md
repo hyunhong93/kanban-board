@@ -52,7 +52,39 @@
 
 ---
 
-## 백로그 (v2 계획)
+## 완료된 작업 (v2.0.0 — 인증 + 배포)
+
+### Supabase 인증
+- [x] `auth.js` — Supabase 클라이언트 초기화 및 세션 관리
+- [x] Google OAuth 로그인 (`signInWithGoogle`)
+- [x] GitHub OAuth 로그인 (`signInWithGithub`)
+- [x] 이메일/비밀번호 로그인 및 회원가입 (`handleEmailSubmit`, `toggleMode`)
+- [x] 로그인 오버레이 UI (소셜 버튼 + 이메일 폼 + 모드 전환)
+- [x] 헤더 사용자 정보 표시 (아바타/이름) + 로그아웃 버튼
+- [x] 페이지 새로고침 후 세션 유지 (`getSession`)
+- [x] localStorage 키 사용자별 스코핑 (`kanban-cards-{userId}`)
+- [x] `appInitialized` 플래그로 이벤트 리스너 중복 등록 방지
+- [x] `window.getAuthUser()` 인터페이스로 auth.js → app.js 연결
+
+### 배포
+- [x] GitHub 레포지토리 생성 (`hyunhong93/kanban-board`)
+- [x] GitHub Pages 배포 (`https://hyunhong93.github.io/kanban-board`)
+- [x] 배포 URL 커밋 로그에 기록
+
+### 스타일
+- [x] 인증 오버레이 스타일 (`.auth-overlay`, `.auth-card`, `.social-btn` 등)
+- [x] 헤더 우측 사용자 정보 영역 (`.app-bar-right`, `.user-info`, `.logout-btn`)
+- [x] 모바일 반응형 auth 카드 패딩 조정
+
+### 문서
+- [x] `TRD.md` — Supabase Auth 아키텍처, 스키마, 배포 섹션 추가
+- [x] `PRD.md` — v2.0.0, 인증 기능 요구사항(FR-05) 추가, 배포 URL 기록
+- [x] `PLAN.md` — v2.0 구현 계획 추가
+- [x] `TASKS.md` — 이 파일 업데이트
+
+---
+
+## 백로그 (v3 계획)
 
 ### 기능 개선
 - [ ] 카드 텍스트 인라인 편집 (더블클릭)
@@ -60,25 +92,19 @@
 - [ ] 카드 검색 / 필터
 - [ ] 컬럼 이름 커스터마이징
 - [ ] 컬럼 추가 / 삭제
-- [ ] 카드 아카이브 (삭제 대신 숨김)
 
 ### UX 개선
-- [ ] 카드 추가 시 해당 컬럼으로 스크롤 이동
-- [ ] 드래그 고스트 이미지 커스터마이징 (`setDragImage`)
 - [ ] 터치 디바이스 드래그 지원 (Touch Events API)
 - [ ] 실행 취소 (Ctrl+Z) 기능
 
 ### 기술
-- [ ] 서버 백엔드 연동 (Supabase / FastAPI)
-- [ ] 다중 보드 지원
-- [ ] 사용자 인증 (OAuth)
-- [ ] 실시간 협업 (WebSocket / Supabase Realtime)
-- [ ] 카드 수가 많을 때 가상 스크롤(Virtual Scroll) 적용
+- [ ] 카드 데이터를 Supabase DB에 저장 (다중 디바이스 동기화)
+- [ ] 실시간 협업 (Supabase Realtime)
+- [ ] 비밀번호 재설정 이메일 (`resetPasswordForEmail`)
 
 ### 접근성
 - [ ] 키보드만으로 카드 이동 (화살표 키 + 스페이스)
 - [ ] ARIA live region으로 상태 변경 알림
-- [ ] 고대비 모드 지원
 
 ---
 
