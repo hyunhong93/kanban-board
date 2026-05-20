@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban Board</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <span class="material-icons">view_kanban</span>
+    <span class="app-title">Kanban Board</span>
+  </header>
+
+  <main class="main">
+    <div class="add-card-form">
+      <span class="material-icons form-icon">add_card</span>
+      <input type="text" id="card-input" placeholder="새 카드를 입력하세요" autocomplete="off" />
+      <select id="column-select" aria-label="컬럼 선택">
+        <option value="todo">To-do</option>
+        <option value="inprogress">In-Progress</option>
+        <option value="done">Done</option>
+      </select>
+      <button id="add-btn" aria-label="카드 추가">
+        <span class="material-icons">add</span>
+      </button>
+    </div>
+
+    <div class="board" id="board">
+      <div class="column" id="col-todo" data-column="todo">
+        <div class="column-header">
+          <span class="material-icons col-icon">checklist</span>
+          <span class="col-title">To-do</span>
+          <span class="col-count" id="count-todo">0</span>
+        </div>
+        <div class="card-list" id="list-todo"></div>
+      </div>
+
+      <div class="column" id="col-inprogress" data-column="inprogress">
+        <div class="column-header">
+          <span class="material-icons col-icon">autorenew</span>
+          <span class="col-title">In-Progress</span>
+          <span class="col-count" id="count-inprogress">0</span>
+        </div>
+        <div class="card-list" id="list-inprogress"></div>
+      </div>
+
+      <div class="column" id="col-done" data-column="done">
+        <div class="column-header">
+          <span class="material-icons col-icon">done_all</span>
+          <span class="col-title">Done</span>
+          <span class="col-count" id="count-done">0</span>
+        </div>
+        <div class="card-list" id="list-done"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
