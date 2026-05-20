@@ -9,49 +9,55 @@ let currentBoardId = null;
 // ── 진입점 (auth.js가 로그인 후 호출) ────────────────────────────────────────
 
 async function initApp() {
-  const board = await getOrCreateDefaultBoard();
-  if (!board) return;
-  currentBoardId = board.id;
-
-  document.getElementById('board-name').textContent = board.name;
-
-  cards = await loadCardsFromDB(currentBoardId);
-  render();
-  renderActivityLog();
-  renderBoardMembers();
-
-  subscribeToBoard(currentBoardId, handleRealtimeCard, handleRealtimeActivity);
-
+  // 이벤트 리스너는 async 작업 전에 먼저 등록
   if (!appInitialized) {
     setupColumnDropZones();
     document.getElementById('add-btn').addEventListener('click', addCard);
     document.getElementById('card-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') addCard();
     });
-
-    // 공유 패널
     document.getElementById('share-btn').addEventListener('click', toggleSharePanel);
     document.getElementById('invite-btn').addEventListener('click', handleInvite);
     document.getElementById('share-panel-close').addEventListener('click', () => {
       document.getElementById('share-panel').classList.add('hidden');
     });
-
-    // 활동 로그 패널
     document.getElementById('activity-btn').addEventListener('click', toggleActivityPanel);
     document.getElementById('activity-panel-close').addEventListener('click', () => {
       document.getElementById('activity-panel').classList.add('hidden');
     });
-
-    // 카드 모달
     document.getElementById('card-modal-close').addEventListener('click', closeCardModal);
     document.getElementById('card-modal-save').addEventListener('click', saveCardModal);
     document.getElementById('card-modal-delete').addEventListener('click', deleteCardFromModal);
     document.getElementById('card-modal-overlay').addEventListener('click', e => {
       if (e.target === e.currentTarget) closeCardModal();
     });
-
     appInitialized = true;
   }
+
+  // 보드 로드
+  let board;
+  try {
+    board = await getOrCreateDefaultBoard();
+  } catch (e) {
+    console.error('보드 로드 실패:', e);
+  }
+  if (!board) {
+    console.error('보드를 가져올 수 없습니다.');
+    return;
+  }
+  currentBoardId = board.id;
+  document.getElementById('board-name').textContent = board.name;
+
+  try {
+    cards = await loadCardsFromDB(currentBoardId);
+  } catch (e) {
+    console.error('카드 로드 실패:', e);
+    cards = [];
+  }
+  render();
+  renderBoardMembers();
+
+  subscribeToBoard(currentBoardId, handleRealtimeCard, handleRealtimeActivity);
 }
 
 // ── ID 생성 ───────────────────────────────────────────────────────────────────
