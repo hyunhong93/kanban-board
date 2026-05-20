@@ -1,9 +1,7 @@
 'use strict';
 
-const SUPABASE_URL = 'https://dhikkucdbjqprrlduuqa.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_WKVjsqyamUV__0-3t1U9Wg_2quyzXC6';
-
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// window._supabase는 supabase.js에서 초기화됨
+const _supabase = window._supabase;
 
 let currentUser = null;
 let isSignUp = false;
