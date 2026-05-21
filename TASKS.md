@@ -84,11 +84,64 @@
 
 ---
 
-## 백로그 (v3 계획)
+---
+
+## 완료된 작업 (v3.0.0 — 보드 공유·실시간·카드 상세)
+
+### 다중 보드 관리 (`board.js`)
+- [x] `getOrCreateDefaultBoard()` — 첫 로그인 시 기본 보드 생성 또는 기존 보드 반환
+- [x] `getUserBoards()` — 내가 소유하거나 멤버로 초대된 보드 목록 조회
+- [x] `getBoardMembers()` — 보드 멤버 목록 조회 (owner 포함)
+- [x] `inviteMember()` — 이메일로 멤버 초대 (`get_user_id_by_email` RPC 활용)
+- [x] `removeMember()` — 멤버 강제 제거
+
+### Supabase DB 저장 (`db.js`)
+- [x] `loadCardsFromDB()` / `addCardToDB()` / `updateCardInDB()` / `deleteCardFromDB()` — Supabase `cards` 테이블 CRUD
+- [x] `batchUpdateOrder()` — 드래그 후 순서 일괄 업데이트
+- [x] `logActivity()` — 카드 생성·이동·삭제 활동 로그 기록
+- [x] `loadActivityLogs()` — 최근 50건 활동 로그 조회
+- [x] `subscribeToBoard()` / `unsubscribeFromBoard()` — Supabase Realtime 구독
+
+### 보드 공유 패널 (`app.js`)
+- [x] 공유 버튼 → 공유 패널 슬라이드인
+- [x] 이메일 입력 → `inviteMember()` 호출 → 결과 메시지 표시
+- [x] 멤버 목록 렌더 (`renderBoardMembers`)
+
+### 활동 로그 패널
+- [x] 활동 버튼 → 활동 패널 슬라이드인
+- [x] 최근 50건 로그 목록 표시 (시간, 사용자, 내용)
+- [x] Realtime 신규 활동 자동 갱신
+
+### 카드 상세 모달
+- [x] 카드 클릭 → 상세 모달 열기 (`openCardModal`)
+- [x] 제목, 설명, 마감일, 우선순위, 태그 편집 후 저장 (`saveCardModal`)
+- [x] 모달에서 카드 삭제 (`deleteCardFromModal`)
+- [x] 오버레이 클릭 / X 버튼으로 닫기
+
+### 카드 속성 확장
+- [x] 우선순위 배지 (`low` / `medium` / `high`) — 카드에 색상 뱃지 노출
+- [x] 마감일 — 날짜 표시 + 기한 초과 시 빨간색 하이라이트
+- [x] 태그 — 최대 3개 태그 칩 표시
+
+### 실시간 협업
+- [x] `subscribeToBoard()` — `cards`, `activity_logs` 테이블 실시간 변경 감지
+- [x] `handleRealtimeCard()` — INSERT/UPDATE/DELETE를 로컬 `cards[]`에 반영
+- [x] `handleRealtimeActivity()` — 새 활동 로그 자동 prepend
+
+### Supabase 마이그레이션
+- [x] `boards` 테이블 + RLS 정책 (v3 migration)
+- [x] `board_members` 테이블 + RLS 정책
+- [x] `activity_logs` 테이블 + RLS 정책
+- [x] `cards` 테이블 `board_id` 외래키 추가
+
+### 문서
+- [x] `TASKS.md` — v3.0.0 작업 목록 추가
+
+---
+
+## 백로그
 
 ### 기능 개선
-- [ ] 카드 텍스트 인라인 편집 (더블클릭)
-- [ ] 카드 상세 보기 (모달 — 설명, 마감일, 라벨)
 - [ ] 카드 검색 / 필터
 - [ ] 컬럼 이름 커스터마이징
 - [ ] 컬럼 추가 / 삭제
@@ -96,10 +149,6 @@
 ### UX 개선
 - [ ] 터치 디바이스 드래그 지원 (Touch Events API)
 - [ ] 실행 취소 (Ctrl+Z) 기능
-
-### 기술
-- [ ] 카드 데이터를 Supabase DB에 저장 (다중 디바이스 동기화)
-- [ ] 실시간 협업 (Supabase Realtime)
 - [ ] 비밀번호 재설정 이메일 (`resetPasswordForEmail`)
 
 ### 접근성
